@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
 
 	double x_0,alpha,candidate,a,a_rate;
 
-	fp = fopen("./data/mcmc_serial.dat","w");
+	fp = fopen("./data/test.dat","w");
 	//generate random starting point
 	x_0 = gsl_ran_flat(r,-20,20);
 	alpha = 1.0;
