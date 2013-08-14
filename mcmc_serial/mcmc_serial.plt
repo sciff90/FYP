@@ -4,7 +4,6 @@ set title "Probability distribution P(x)"
 set grid
 set term postscript color #output postscript
 set output "plots/mcmc_serial.ps"
-
 n=100 #number of intervals
 max=5. #max value
 min=-5. #min value
@@ -15,4 +14,5 @@ set boxwidth width*0.9
 set style fill solid 0.5 #fillstyleset xlabel "x"
 set ylabel "Frequency"
 set xlabel "x"
-plot "./data/test.dat" u (hist($1,width)):(1.0) smooth freq w boxes lc rgb"green" notitle
+plot 	"./data/test.dat" u (hist($1,width)):(1.0) smooth freq w boxes lc rgb"green" notitle,\
+	normal(x,0,1)*10000  + normal(x,10,2)*10000 linecolor rgb "red"

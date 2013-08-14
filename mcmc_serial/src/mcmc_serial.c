@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
 	r = gsl_rng_alloc(gsl_rng_mt19937);
 	FILE *fp;
 
-	const int N = 1000,Iters = 1000;
+	const int N = 1000,Iters = 100000;
 	int ii;
 
 	double x_0,alpha,candidate,a;
@@ -19,12 +19,12 @@ int main(int argc, char *argv[])
 	fp = fopen("./data/test.dat","w");
 	//generate random starting point
 	x_0 = gsl_ran_flat(r,-20,20);
-	alpha = 0.25;
+	alpha = 0.2;
 
 	for (ii = 0; ii < Iters; ii++)
 	{
 		candidate = x_0+gsl_ran_gaussian(r,alpha);
-		a = gsl_ran_ugaussian_pdf(candidate)/gsl_ran_ugaussian_pdf(x_0);
+		a = (gsl_ran_gaussian_pdf(candidate,1)+gsl_ran_gaussian_pdf(candidate-10,2))/(gsl_ran_gaussian_pdf(x_0,1)+gsl_ran_gaussian_pdf(x_0-10,2));
 		//printf("a = %f\n",a);
 		if(gsl_rng_uniform(r)<a)
 			x_0 = candidate;
@@ -34,6 +34,7 @@ int main(int argc, char *argv[])
 	fclose(fp);
 	gsl_rng_free(r);
 	system("gnuplot mcmc_serial.plt");
+	gsl_r
 
 
 	return 0;
