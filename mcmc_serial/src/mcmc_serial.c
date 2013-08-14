@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
 	for (ii = 0; ii < Iters; ii++)
 	{
 		candidate = x_0+gsl_ran_gaussian(r,alpha);
-		a = (gsl_ran_gaussian_pdf(candidate,1)+gsl_ran_gaussian_pdf(candidate-10,2))/(gsl_ran_gaussian_pdf(x_0,1)+gsl_ran_gaussian_pdf(x_0-10,2));
+		a = ((gsl_ran_gaussian_pdf(candidate,1)+gsl_ran_gaussian_pdf(candidate-10,2)))/((gsl_ran_gaussian_pdf(x_0,1)+gsl_ran_gaussian_pdf(x_0-10,2)));
 		//printf("a = %f\n",a);
 		if(gsl_rng_uniform(r)<a)
 			x_0 = candidate;
@@ -34,8 +34,7 @@ int main(int argc, char *argv[])
 	fclose(fp);
 	gsl_rng_free(r);
 	system("gnuplot mcmc_serial.plt");
-	gsl_r
-
+	
 
 	return 0;
 }
