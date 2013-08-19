@@ -27,6 +27,9 @@ y = filter(b,a,u(:,2));
 
 chi1 = sum((D-y).^2);
 sigma = 1.0;
+a_save(10000,order+1) = 0;
+b_save(10000,order+1) = 0;
+chi_save(10000) = 0;
 ii = 0;
 flg = 0;
 accepted = 0;
@@ -35,9 +38,7 @@ for n = 1:100000
     a1 = a + sigma*randn(1,order+1);
     b1 = b + sigma*randn(1,order+1);
     a1(1) = 1;
-    a1(2) = -0.7265;
-    %b1(1) = 0.1367;
-    b1(2) = 0.1367;
+    a1(2) = -0.7265;     
     y_cand = filter(b1,a1,u(:,2));
     
     chi2 = sum((D-y_cand).^2);
@@ -50,21 +51,21 @@ for n = 1:100000
         accepted = accepted+1;
     end
     
-    if(mod(ii,500)==0 && ii ~=0 && flg==0)
+    if(mod(ii,100)==0 && ii ~=0)
         if(accepted/ii < 0.3)
-            sigma = sigma/3.2;
+            sigma = sigma/1.5
             ii = 0;
             accepted = 0;
         elseif(accepted/ii > 0.4)
-            sigma = sigma*3.2;
+            sigma = sigma*1.5
             ii = 0;
             accepted = 0;
         else
-            burnin = n-1;
+            burnin = n;
             flg = 1;
         end
     end
-    ii = ii+1;
+    
     if(flg==1)
         a_save(n-burnin,:) = a1;
         b_save(n-burnin,:) = b1;
