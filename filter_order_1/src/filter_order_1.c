@@ -9,7 +9,7 @@ void add_noise(double y[],double sigma,int N);
 double var(double y1[],double y2[],int N);
 int main()
 {
-	printf("Butter Worth nth-Order Filter MCMC Approximation");
+	printf("Butter Worth nth-Order Filter MCMC Approximation\n");
 	
 	//Random Generator Setup
 	const gsl_rng_type * T;
@@ -72,25 +72,29 @@ int main()
 	}
 
 	a_proposed[0] = 1.0;
-	a_candidate[0] = 1.0;
+	a_candidate[0] = 1.0;	
+	a_proposed[1] = -0.7;
+	b_proposed[0] = 0.1;
+	b_proposed[1] = 0.1;
 
 	//Begin MCMC Algorithm
 	double accept;
-	double alpha = 1.0;
+	double alpha = 0.1;
+	int accepted = 0;
 	//Generate Output for proposal
 	filter_out(a_proposed,b_proposed,y_proposed,u,N,n_order);
 	add_noise(y_proposed,0.05,N);
-	printf("Testing\n");
-	for (ii = 0; ii < 100; ii++)
+	
+	for (ii = 0; ii <0  ; ii++)
 	{
 		//Generate Random Coefficients
 		for (jj = 0; jj <=(n_order+1); jj++)
-		{
-			if(jj==0) b_candidate[jj] += gsl_ran_gaussian(r,alpha);
+		{	
+			if(jj==0) b_candidate[jj] = gsl_ran_gaussian(r,alpha)+b_proposed[ii];
 			else
 			{
-				a_candidate[jj] += gsl_ran_gaussian(r,alpha);
-				b_candidate[jj] += gsl_ran_gaussian(r,alpha);
+				a_candidate[jj] = gsl_ran_gaussian(r,alpha)+a_proposed[ii];
+				b_candidate[jj] = gsl_ran_gaussian(r,alpha)+b_proposed[ii];
 			}
 
 		}
@@ -98,13 +102,17 @@ int main()
 		filter_out(a_candidate,b_candidate,y_candidate,u,N,n_order);
 		add_noise(y_candidate,0.05,N);
 		//Calculate acceptance
-		accept = var(y_out,y_candidate,N)/var(y_out,y_proposed,N);
+		accept = var(y_out,y_proposed,N)/var(y_out,y_candidate,N);
+		printf("var1 = %E\n",var(y_out,y_candidate,N));
+		printf("var2 = %E\n",var(y_out,y_proposed,N));
+		printf("accept = %E\n",accept);
 		//Check a value
-		if(gsl_rng_uniform(r)<accept)
+		if(accept>=1 || gsl_rng_uniform(r)<accept)
 		{
+			
 			for (jj = 0; jj <= n_order+1; jj++)
 			{
-				if(jj=0) b_proposed[jj] = b_candidate[jj];
+				if(jj==0) b_proposed[jj] = b_candidate[jj];
 				else
 				{	
 					a_proposed[jj] = a_candidate[jj];
@@ -113,12 +121,26 @@ int main()
 			}
 			filter_out(a_proposed,b_proposed,y_proposed,u,N,n_order);
 			add_noise(y_proposed,0.05,N);
-			printf("accepted\n");
+			accepted++;
+			//printf("accepted\n\n");
 		}
-		printf("Not accepted\n");
+		//printf("Not accepted\n\n");
+		if(ii%100==0&&ii!=0)
+		{
+			if((double)(accepted/ii)<0.3)alpha = alpha*1.2;
+			else alpha = alpha/1.2;
+
+			printf("alpha = %E\n",alpha);
+		}
+
 
 		
 	}
+	printf("a[1] = %E\n",a_proposed[1]);
+	printf("b[0] = %E\n",b_proposed[0]);
+	printf("b[1] = %E\n",b_proposed[1]);
+	printf("alpha = %E\n",alpha);
+	printf("# accpeted = %d\n",accepted);
 	//Output To Files
 	FILE *fp,*fp1;
 	fp = fopen("data/filter.dat","w");
@@ -138,6 +160,7 @@ void filter_out(double a[],double b[],double y[],double u[],int N,int n_order)
 {
 	int ii,jj;
 
+	for(ii=0;ii<n_order;ii++)y[ii] = 0;
 	for (ii = n_order; ii < (N); ii++)
 	{
 		for (jj = 1; jj <= n_order; jj++)
@@ -150,6 +173,7 @@ void filter_out(double a[],double b[],double y[],double u[],int N,int n_order)
 		}
 		
 		y[ii] = y[ii]/a[0];
+		if(abs(y[ii])>1000)y[ii] = 1000;
 	}
 }
 void add_noise(double y[],double sigma,int N)
