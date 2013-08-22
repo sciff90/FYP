@@ -1,13 +1,14 @@
-#gaussian Makefile
+#Butterworth Makefilw
+
 #Define Objects
 
 OBJ = obj
 SRC = src
 PLOTS = plots
 DATA = data
-EXEC = xgaussian
+EXEC = xbutterworth
 
-OBJECTS = ${OBJ}/gaussian.o
+OBJECTS = ${OBJ}/butterworth.o
 
 #Define Compiler
 
@@ -20,7 +21,7 @@ COMP = gcc
 
 
 LIB_DIR = 
-LIB = -lgsl -lgslcblas
+LIB = -lgsl -lgslcblas -lm
 IDIR = -I.
 ##############################
 
@@ -29,8 +30,8 @@ IDIR = -I.
 all: $(OBJECTS)
 		$(COMP) $(SWITCH) ${OBJECTS} $(IDIR) -o ${EXEC} $(LIB_DIR) $(LIB)
 			
-${OBJ}/gaussian.o: ${SRC}/gaussian.c
-		$(COMP) -c $(SWITCH) $(LIB_DIR) $(LIB) $(IDIR) ${SRC}/gaussian.c -o ${OBJ}/gaussian.o
+${OBJ}/butterworth.o: ${SRC}/butterworth.c
+		$(COMP) -c $(SWITCH) $(LIB_DIR) $(LIB) $(IDIR) ${SRC}/butterworth.c -o ${OBJ}/butterworth.o
 			
 clean:
 		rm ${OBJ}/*.o
