@@ -34,7 +34,9 @@ d_best = d_curr;
 y_curr = filter(b_curr,a_curr,u);%+d_curr*wgn(num_samples+1,4,0);
 
 chi1 = sum((D-y_curr).^2);
-sigma = 0.00001;
+a = 7.36*10^-5;
+temp = 0:1:250000;
+sigma = 100*exp(-a.*temp);
 ii = 0;
 N_iter = 0;
 flg = 0;
@@ -46,7 +48,7 @@ chi_best = chi1;
 count = 0;
 while(flg==0)
     
-    a_cand = a_curr + sigma*randn(1,order+1);
+    a_cand = a_curr + sigma()*randn(1,order+1);
     b_cand = b_curr + sigma*randn(1,order+1);
     temp = d_curr+sigma*(randn(1,1));
     while(temp<0)
@@ -97,25 +99,18 @@ while(flg==0)
             burnin = N_iter;
             flg = 1;
     end
-    %ii = ii+1;
+    ii = ii+1;
     N_iter = N_iter+1;
     
-    if(mod(ii,20)==0)
-        if(accepted/ii > 0.25)
-            sigma = sigma/2.2;
-            accep
-        else
-            sigma = sigma*2.2;
-        end
-    end
-    if(T<1*10^-6)
+    
+    if(T<1*10^-9)
         T = T_max;
         b_curr = rand(1,order+1);
         a_curr = rand(1,order+1);
         a_curr(1) = a(1);
         y_curr = filter(b_curr,a_curr,u);
         chi1 = sum((D-y_curr).^2);
-        sigma = 1;
+        sigma = 0.001;
     end
     norm(chi_best)
 end

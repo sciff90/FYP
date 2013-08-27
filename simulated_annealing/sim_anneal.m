@@ -1,5 +1,5 @@
 clear all
-order = 1;
+order = 2;
 fs = 400;
 fc = 20;
 fnorm = fc*2/fs;
@@ -8,7 +8,7 @@ t1 = 0.1;
 t0 = 0;
 t = t0:dt:t1;
 num_samples = (t1-t0)/dt;
-u = [ones(num_samples+1,1)';-sin(10.*t);-cos(20.*t);-cos(100.*t)];
+u = [ones(num_samples+1,1)';3.*ones(num_samples+1,1)';-2.*ones(num_samples+1,1)';cos(-10.*t)];
 %u = [ones(num_samples+1,1)'];
 %u = [ones(num_samples+1,1)'; -1*ones(num_samples+1,1)'];
 u(:,1) = 0;
@@ -27,20 +27,20 @@ noise = d*wgn(num_samples+1,4,0);
 D = filter(b,a,u);%+noise;
 b_curr = rand(1,order+1);
 a_curr = rand(1,order+1);
-a_curr(1) = 1;
+a_curr(1) = a(1);
 d_curr = rand;
 d_curr = 0.1;
 d_best = d_curr;
 y_curr = filter(b_curr,a_curr,u);%+d_curr*wgn(num_samples+1,4,0);
 
 chi1 = sum((D-y_curr).^2);
-sigma = 1;
+sigma = 0.001;
 ii = 0;
 N_iter = 0;
 flg = 0;
 accepted = 0;
 T_max = 100000;
-T_change = 0.8;
+T_change = 0.9999;
 T = T_max;
 chi_best = chi1;
 count = 0;
@@ -83,8 +83,7 @@ while(flg==0)
         accepted = accepted+1;
         T = T*T_change;
     end
-    
-    
+       
     %if(mod(ii,10)==0 && ii ~=0 && flg==0)
     %        sigma = sigma/2.5;
     %        if(sigma < 10^-4);
@@ -94,12 +93,23 @@ while(flg==0)
     %    accepted = 0;        
     %end
         
-    if(norm(chi_best)<10^-2)
+    if(norm(chi_best)<10^-3)
             burnin = N_iter;
             flg = 1;
     end
-    %ii = ii+1;
-    N_iter = N_iter+1; 
+    ii = ii+1;
+    N_iter = N_iter+1;
+    
+    
+    if(T<1*10^-9)
+        T = T_max;
+        b_curr = rand(1,order+1);
+        a_curr = rand(1,order+1);
+        a_curr(1) = a(1);
+        y_curr = filter(b_curr,a_curr,u);
+        chi1 = sum((D-y_curr).^2);
+        sigma = 0.001;
+    end
     norm(chi_best)
 end
 

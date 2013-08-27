@@ -1,7 +1,7 @@
 clear all
 order = 2;
 fs = 400;
-fc = 20;
+fc = 40;
 fnorm = fc*2/fs;
 dt = 1/fs;
 t1 = 0.1;
@@ -33,10 +33,10 @@ d_curr = 0.1;
 d_best = d_curr;
 y_curr = filter(b_curr,a_curr,u);%+d_curr*wgn(num_samples+1,4,0);
 
-chi1 = sum((D-y_curr).^2);
-sigma = 0.00001;
+chi1 = 1/num_samples*sum((D-y_curr).^2);
+sigma = 0.001;
 ii = 0;
-N_iter = 0;
+N_iter = 1;
 flg = 0;
 accepted = 0;
 T_max = 100000;
@@ -59,7 +59,7 @@ while(flg==0)
     
     y_cand = filter(b_cand,a_cand,u);%+d_cand*wgn(num_samples+1,4,0);    
     
-    chi2 = sum((D-y_cand).^2);
+    chi2 = 1/num_samples*sum((D-y_cand).^2);
         
     if(norm(chi2)<= norm(chi1))
         a_curr = a_cand;
@@ -83,39 +83,26 @@ while(flg==0)
         accepted = accepted+1;
         T = T*T_change;
     end
+    
        
-    %if(mod(ii,10)==0 && ii ~=0 && flg==0)
-    %        sigma = sigma/2.5;
-    %        if(sigma < 10^-4);
-    %            sigma = 10;                
-    %        end
-    %    ii=0;
-    %    accepted = 0;        
-    %end
-        
-    if(norm(chi_best)<10^-3)
+           
+    if(norm(chi_best)<10^-5)
             burnin = N_iter;
             flg = 1;
     end
-    %ii = ii+1;
+    ii = ii+1;
     N_iter = N_iter+1;
     
-    if(mod(ii,20)==0)
-        if(accepted/ii > 0.25)
-            sigma = sigma/2.2;
-            accep
-        else
-            sigma = sigma*2.2;
-        end
-    end
+    
     if(T<1*10^-6)
         T = T_max;
         b_curr = rand(1,order+1);
         a_curr = rand(1,order+1);
         a_curr(1) = a(1);
         y_curr = filter(b_curr,a_curr,u);
-        chi1 = sum((D-y_curr).^2);
-        sigma = 1;
+        chi1 = sum((D-y_curr).^2);        
+        N_iter = 0;
+        sigma = 0.0001;
     end
     norm(chi_best)
 end
