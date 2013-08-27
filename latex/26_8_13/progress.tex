@@ -1,0 +1,25 @@
+% vim:ft=tex:
+%
+\documentclass[12pt]{article}
+
+\usepackage{graphicx}
+\usepackage{amsmath}
+\title{progress
+}
+\author{gareths --- \texttt{gareths@mds041-OptiPlex-780}}
+
+\begin{document}
+\maketitle
+\pagebreak
+Hi Brett and Steve.\\\\
+This is the progress I have made so far with estimating parameters using metropolis hastings. I have coded both a standard metropolis hastings into Matlab and c. I have then coded a simulated Annealing algorithm into Matlab. The simulated annealing algorithm as far as I can tell is much more successful than the standard metropolis hastings. I have had to play around a bit with how to test the closeness of fit for the likelihood functions in the algorithms. I will hopeful explain my reasoning alright for each one. The next step I think is to take the Simulated annealing algorithm to an MPI code and then to GPU. \\
+
+The MPI code will simply allow a comparison between a serial algorithm on a CPU to a multi-threaded implementation. To do this I don't think will be too difficult. Just for each temperature we send out multiple seed values and only take the best one for the next temperature iteration. I also want to take the standard metropolis to multithread for comparison. Since the two algorithms are extremely similar it would just be nice for comparison.\\
+
+A concern for me is the estimation for the noise in the system. When I attempt to add noise to the output and try to fit a noise parameter to the output of the model filter I get a small value with the other parameters seemingly averaging out the noisy output. I'll include an image for what I mean here.
+\section{Standard Metropolis Hastings}
+Testing 1 2 3 how this is changing this is changing  quickly $\alpha = \frac{\theta}{\chi}$
+\section{Simulated Annealing }
+testing 2
+\end{document}
+

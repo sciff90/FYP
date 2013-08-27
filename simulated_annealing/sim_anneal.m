@@ -1,115 +1,118 @@
 clear all
-order = 2;
+order = 1;
 fs = 400;
 fc = 20;
 fnorm = fc*2/fs;
 dt = 1/fs;
-t1 = 0.15;
+t1 = 0.1;
 t0 = 0;
 t = t0:dt:t1;
 num_samples = (t1-t0)/dt;
-u = [ones(num_samples+1,1)';sin(10.*t)]
-stop
-u(1,:) = 0;
+u = [ones(num_samples+1,1)';-sin(10.*t);-cos(20.*t);-cos(100.*t)];
+%u = [ones(num_samples+1,1)'];
+%u = [ones(num_samples+1,1)'; -1*ones(num_samples+1,1)'];
+u(:,1) = 0;
+u = u';
 pnoise = [t;0.01*wgn(num_samples+1,1,0)']';
 onoise = [t;0.01*wgn(num_samples+1,1,0)']';
 [b,a] = butter(order,fnorm);
 %sim('butterworth_mdl.mdl')
 %plot(t,y,t,y_n,t,u(:,2))
 
-e1_noise = 0.1*wgn(num_samples+1,1,0);
-e2_noise = 0.1*wgn(num_samples+1,1,0);
+d = 0.1;
+noise = d*wgn(num_samples+1,4,0);
 
 %MCMC part
 
-D = filter(b,a,u);
-b = rand(1,order+1);
-a = rand(1,order+1);
-a(1) = 1;
-y = filter(b,a,u);
+D = filter(b,a,u);%+noise;
+b_curr = rand(1,order+1);
+a_curr = rand(1,order+1);
+a_curr(1) = 1;
+d_curr = rand;
+d_curr = 0.1;
+d_best = d_curr;
+y_curr = filter(b_curr,a_curr,u);%+d_curr*wgn(num_samples+1,4,0);
 
-chi1 = sum((D-y).^2);
-%chi1 = sum(abs(D-y));
-sigma = 1.0;
+chi1 = sum((D-y_curr).^2);
+sigma = 1;
 ii = 0;
+N_iter = 0;
 flg = 0;
 accepted = 0;
-T1 = 100;
-T = T1;
-for n = 1:80000
+T_max = 100000;
+T_change = 0.8;
+T = T_max;
+chi_best = chi1;
+count = 0;
+while(flg==0)
     
-    a1 = a + sigma*randn(1,order+1);
-    b1 = b + sigma*randn(1,order+1);
-    a1(1) = 1;
-    %a1(2) = -0.7265;
-    %b1(1) = 0.1367;
-    %b1(2) = 0.1367;
-    y_cand = filter(b1,a1,u);
-    a1(2);
-    b1;
-    chi1;
+    a_cand = a_curr + sigma*randn(1,order+1);
+    b_cand = b_curr + sigma*randn(1,order+1);
+    temp = d_curr+sigma*(randn(1,1));
+    while(temp<0)
+        temp = d_curr+sigma*(randn(1,1));
+    end
+    d_cand = temp;
+    d_cand = 0.1;
+            
+    a_cand(1) = 1;    
+    
+    y_cand = filter(b_cand,a_cand,u);%+d_cand*wgn(num_samples+1,4,0);    
+    
     chi2 = sum((D-y_cand).^2);
-    %chi2 = sum(abs(D-y_cand));
-    ratio = exp(-chi2+chi1);
-    
-    if(rand < exp((chi1-chi2)/T))
-        a = a1;
-        b = b1;
+        
+    if(norm(chi2)<= norm(chi1))
+        a_curr = a_cand;
+        b_curr = b_cand; 
+        d_curr = d_cand;
+        if(norm(chi2)<=norm(chi_best))
+            a_best = a_curr;
+            b_best = b_curr;
+            d_best = d_curr;
+            chi_best = chi2;
+           
+        end
         chi1 = chi2;
         accepted = accepted+1;
-        T = T*0.5;
+        T = T*T_change;
+    elseif(exp((chi1-chi2)/T)>rand())
+        a_curr = a_cand;
+        b_curr = b_cand;
+        d_curr = d_cand;
+        chi1 = chi2;
+        accepted = accepted+1;
+        T = T*T_change;
     end
     
-    if(mod(ii,100)==0 && ii ~=0 && flg==0)
-        accepted;
-        if(accepted/ii < 0.3)
-            sigma = sigma/1.2;
-            ii = 0;
-            accepted = 0;
-            T = T1;
-        elseif(accepted/ii > 0.4)
-            sigma = sigma*1.2;
-            ii = 0;
-            accepted = 0;
-            T = T1;
-        else
-            burnin = n-1;
+    
+    %if(mod(ii,10)==0 && ii ~=0 && flg==0)
+    %        sigma = sigma/2.5;
+    %        if(sigma < 10^-4);
+    %            sigma = 10;                
+    %        end
+    %    ii=0;
+    %    accepted = 0;        
+    %end
+        
+    if(norm(chi_best)<10^-2)
+            burnin = N_iter;
             flg = 1;
-        end
     end
-    ii = ii+1;
-    if(flg==1)
-        a_save(n-burnin,:) = a1;
-        b_save(n-burnin,:) = b1;
-        chi_save(n-burnin) = chi1;
-    end
-    
-    
+    %ii = ii+1;
+    N_iter = N_iter+1; 
+    norm(chi_best)
 end
 
-accepted
-min_loc = find(chi_save==min(min(chi_save)));
-a2 = a_save(min_loc(1),:);
-b2 = b_save(min_loc(1),:);
-y = filter(b2,a2,u);
+y = filter(b_best,a_best,u);% + d_best*wgn(num_samples+1,4,0);
 [b,a] = butter(order,fnorm);
-y_ideal = filter(b,a,u);
+y_ideal = filter(b,a,u);%+noise;
 figure(1);
 plot(t,y,t,y_ideal)
-%hist(a_save(:,2),100)
-%figure
-%hist(b_save(:,1),100)
-%figure
-%hist(b_save(:,2),100)
-a_ratio = accepted/(n-burnin)
-sigma
-mu = mean(b_save(:,1))
-sig = sqrt(var(b_save(:,1)))
-T
-a2 = mean(a_save);
-b2 = mean(b_save);
-y = filter(b2,a2,u);
-[b,a] = butter(order,fnorm);
-y_ideal = filter(b,a,u);
-figure(2);
-plot(t,y,t,y_ideal)
+format long
+a
+a_best
+b
+b_best
+%d
+%d_best
+norm_err = norm(chi_best)
