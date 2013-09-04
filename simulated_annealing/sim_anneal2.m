@@ -34,17 +34,19 @@ d_best = d_curr;
 y_curr = filter(b_curr,a_curr,u);%+d_curr*wgn(num_samples+1,4,0);
 
 chi1 = 1/num_samples*sum((D-y_curr).^2);
-sigma = 0.001;
+sigma = 0.001;;
 ii = 0;
 N_iter = 1;
 flg = 0;
 accepted = 0;
 T_max = 100000;
-T_change = 0.9999;
+T_change = 0.999;
 T = T_max;
 chi_best = chi1;
 count = 0;
 while(flg==0)
+    
+    for nn=1:100
     
     a_cand = a_curr + sigma*randn(1,order+1);
     b_cand = b_curr + sigma*randn(1,order+1);
@@ -73,15 +75,13 @@ while(flg==0)
            
         end
         chi1 = chi2;
-        accepted = accepted+1;
-        T = T*T_change;
+        accepted = accepted+1;        
     elseif(exp((chi1-chi2)/T)>rand())
         a_curr = a_cand;
         b_curr = b_cand;
         d_curr = d_cand;
         chi1 = chi2;
-        accepted = accepted+1;
-        T = T*T_change;
+        accepted = accepted+1;        
     end
     
        
@@ -92,19 +92,10 @@ while(flg==0)
     end
     ii = ii+1;
     N_iter = N_iter+1;
-    
-    
-    if(T<1*10^-6)
-        T = T_max;
-        b_curr = rand(1,order+1);
-        a_curr = rand(1,order+1);
-        a_curr(1) = a(1);
-        y_curr = filter(b_curr,a_curr,u);
-        chi1 = sum((D-y_curr).^2);        
-        N_iter = 0;
-        sigma = 0.0001;
-    end
+          
     norm(chi_best)
+    end
+    T = T*T_change;
 end
 
 y = filter(b_best,a_best,u);% + d_best*wgn(num_samples+1,4,0);
