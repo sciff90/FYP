@@ -27,18 +27,20 @@ IDIR = -I.
 
 
 #Makefile
-all: $(OBJECTS)
+all: DIR $(OBJECTS)
 		$(COMP) $(SWITCH) ${OBJECTS} $(IDIR) -o ${EXEC} $(LIB_DIR) $(LIB)
 			
 ${OBJ}/butterworth.o: ${SRC}/butterworth.c
 		$(COMP) -c $(SWITCH) $(LIB_DIR) $(LIB) $(IDIR) ${SRC}/butterworth.c -o ${OBJ}/butterworth.o
+DIR:
+		mkdir -p $(OBJ) $(PLOTS) $(DATA)
 			
 clean:
-		rm ${OBJ}/*.o
-		rm ${PLOTS}/*.ps
-		rm ${DATA}/*.dat
+		rm -rf ${OBJ}
+		rm -rf ${PLOTS}
+		rm -rf ${DATA}
 
 #Cleaning Everything
 cleanest: clean
-		rm ${EXEC}
+		rm -f ${EXEC}
 # End of the makefile

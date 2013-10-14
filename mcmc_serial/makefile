@@ -26,18 +26,19 @@ IDIR = -I.
 
 
 #Makefile
-all: $(OBJECTS)
+all: DIR $(OBJECTS)
 		$(COMP) $(SWITCH) ${OBJECTS} $(IDIR) -o ${EXEC} $(LIB_DIR) $(LIB)
 			
 ${OBJ}/mcmc_serial.o: ${SRC}/mcmc_serial.c
 		$(COMP) -c $(SWITCH) $(LIB_DIR) $(LIB) $(IDIR) ${SRC}/mcmc_serial.c -o ${OBJ}/mcmc_serial.o
-			
+DIR:
+		mkdir -p $(PLOTS) $(OBJ) $(DATA)		
 clean:
-		rm ${OBJ}/*.o
-		rm ${PLOTS}/*.ps
-		rm ${DATA}/*.dat
+		rm -rf ${OBJ}
+		rm -rf ${PLOTS}
+		rm -rf ${DATA}
 
 #Cleaning Everything
 cleanest: clean
-		rm ${EXEC}
+		rm -f ${EXEC}
 # End of the makefile

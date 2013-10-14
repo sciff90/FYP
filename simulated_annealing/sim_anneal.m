@@ -1,5 +1,5 @@
 clear all
-order = 2;
+order = 3;
 fs = 400;
 fc = 20;
 fnorm = fc*2/fs;
@@ -24,6 +24,19 @@ noise = d*wgn(num_samples+1,4,0);
 
 %MCMC part
 
+%Read in from file
+%fid = fopen('Data/climate.dat');
+%A = fscanf(fid, '%g %g %g', [3 inf]);
+%fclose(fid);
+%A = A';
+%t = A(:,1);
+%u= A(:,2);
+%D = A(:,3);
+
+%num_samples = size(t);
+%u = [ones(num_samples,1)';3.*ones(num_samples,1)';-2.*ones(num_samples,1)'];
+%D = [A(:,3)';3.*A(:,3)';-2.*A(:,3)'];
+%D = A(:,3);
 D = filter(b,a,u);%+noise;
 b_curr = rand(1,order+1);
 a_curr = rand(1,order+1);
@@ -74,14 +87,16 @@ while(flg==0)
         end
         chi1 = chi2;
         accepted = accepted+1;
-        T = T*T_change;
+        %T = T*T_change;
+        T = 1/log(T+1)
     elseif(exp((chi1-chi2)/T)>rand())
         a_curr = a_cand;
         b_curr = b_cand;
         d_curr = d_cand;
         chi1 = chi2;
         accepted = accepted+1;
-        T = T*T_change;
+        %T = T*T_change;
+        T = 1000/log(T+1)
     end
        
     %if(mod(ii,10)==0 && ii ~=0 && flg==0)

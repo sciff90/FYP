@@ -1,7 +1,7 @@
 clear all
-order = 2;
+order = 3;
 fs = 400;
-fc = 40;
+fc = 20;
 fnorm = fc*2/fs;
 dt = 1/fs;
 t1 = 0.1;
@@ -24,7 +24,20 @@ noise = d*wgn(num_samples+1,4,0);
 
 %MCMC part
 
-D = filter(b,a,u);%+noise;
+%Read in from file
+fid = fopen('Data/climate.dat');
+A = fscanf(fid, '%g %g %g', [3 inf]);
+fclose(fid);
+A = A';
+t = A(:,1);
+u= A(:,2);
+D = A(:,3);
+
+num_samples = size(t);
+%u = [ones(num_samples,1)';3.*ones(num_samples,1)';-2.*ones(num_samples,1)'];
+%D = [A(:,3)';3.*A(:,3)';-2.*A(:,3)'];
+D = A(:,3);
+
 b_curr = rand(1,order+1);
 a_curr = rand(1,order+1);
 a_curr(1) = a(1);
